@@ -16,7 +16,7 @@ import {
   Activity,
   Loader2,
 } from "lucide-react";
-import toast from "react-hot-toast"; // Import Toast
+import toast from "react-hot-toast";
 
 const SubjectDashboard = () => {
   const { subjectId } = useParams();
@@ -39,19 +39,19 @@ const SubjectDashboard = () => {
 
   const fetchData = async () => {
     try {
+      // 1. Fetch Subject (This response ALREADY contains the filtered lessons)
       const { data: subject } = await api.get(`/subjects/${subjectId}`);
       setSubjectData(subject);
 
+      // 2. Update UI State based on User Progress
       if (subject.userProgress) {
         setRating(subject.userProgress.skillLevel || 1);
         setIsLocked(subject.userProgress.hasSetRating);
       }
 
-      // Backend now correctly filters based on the user rating we just fetched
-      const { data: lessonList } = await api.get(
-        `/lessons/subject/${subjectId}`
-      );
-      setLessons(lessonList);
+      // 3. CRITICAL FIX: Use lessons from subject response.
+      // Do NOT fetch from /lessons/subject/ again.
+      setLessons(subject.lessons || []);
     } catch (error) {
       console.error("Error fetching data", error);
       toast.error("Failed to load course data");
@@ -68,6 +68,8 @@ const SubjectDashboard = () => {
 
     try {
       setIsUpdating(true);
+
+      // Save to Backend
       await api.post("/users/subject/rating", {
         subjectId,
         rating: parseInt(rating),
@@ -76,7 +78,7 @@ const SubjectDashboard = () => {
       setIsLocked(true);
       toast.success("Rating confirmed! Adapting curriculum...");
 
-      // RELOAD DATA to get the correct Level 1 questions for this rating
+      // Reload to fetch the NEW filtered content
       await fetchData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Error saving rating");
@@ -178,7 +180,7 @@ const SubjectDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column */}
+        {/* Left Column (Rating) */}
         <div className="lg:col-span-4 space-y-8">
           <div
             className={`p-8 rounded-3xl border transition-all ${

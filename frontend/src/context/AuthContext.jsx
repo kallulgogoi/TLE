@@ -40,8 +40,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     window.location.href = "/login";
   };
-
-  // --- NEW FUNCTION ---
   const updateUserProfile = async (updates) => {
     try {
       const { data } = await api.put("/users/profile", updates);

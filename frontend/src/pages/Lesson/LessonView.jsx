@@ -21,7 +21,7 @@ const LessonView = () => {
   const [loading, setLoading] = useState(true);
   const [isTheoryCompleted, setIsTheoryCompleted] = useState(false);
   const [markingLoading, setMarkingLoading] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false); // Scroll state
 
   useEffect(() => {
     fetchLessonData();
@@ -51,7 +51,7 @@ const LessonView = () => {
       }
     } catch (error) {
       console.error("Error loading lesson", error);
-      toast.error("Failed to load lesson content");
+      toast.error("Error loading lesson data");
     } finally {
       setLoading(false);
     }
@@ -64,12 +64,10 @@ const LessonView = () => {
       setIsTheoryCompleted(true);
       await checkUser();
 
-      toast.success("Intel acquired! Quiz unlocked.");
-
-      // Scroll to the Start Quiz button area
+      toast.success("Theory marked as read! Quiz unlocked.");
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     } catch (error) {
-      toast.error("Failed to mark progress");
+      toast.error("Error updating progress");
     } finally {
       setMarkingLoading(false);
     }
@@ -158,7 +156,6 @@ const LessonView = () => {
         {/* Action Footer */}
         <div className="p-10 bg-gray-900 border-t border-gray-800">
           <div className="flex flex-col items-center justify-center gap-6 text-center">
-            {/* 1. QUIZ BUTTON (Shows FIRST if completed) */}
             {lesson.quiz && isTheoryCompleted && (
               <button
                 onClick={() => navigate(`/quiz/start/${lesson._id}`)}
@@ -169,7 +166,6 @@ const LessonView = () => {
               </button>
             )}
 
-            {/* 2. MARK COMPLETE BUTTON (Shows if NOT completed) */}
             {!isTheoryCompleted && (
               <div className="w-full max-w-2xl bg-gray-800/50 p-8 rounded-2xl border border-gray-700">
                 <h3 className="text-white font-bold text-lg mb-2">
@@ -195,7 +191,6 @@ const LessonView = () => {
               </div>
             )}
 
-            {/* 3. Status Text */}
             {isTheoryCompleted && (
               <p className="text-green-500 font-medium flex items-center gap-2 bg-green-900/10 px-4 py-2 rounded-full border border-green-900/30">
                 <CheckCircle size={16} /> Theory Module Completed
@@ -205,6 +200,7 @@ const LessonView = () => {
         </div>
       </div>
 
+      {/* Floating Scroll Top Button */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

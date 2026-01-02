@@ -10,7 +10,7 @@ import {
   ArrowUp,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import toast from "react-hot-toast"; // Import Toast
+import toast from "react-hot-toast";
 
 const LessonView = () => {
   const { id } = useParams();
@@ -21,7 +21,7 @@ const LessonView = () => {
   const [loading, setLoading] = useState(true);
   const [isTheoryCompleted, setIsTheoryCompleted] = useState(false);
   const [markingLoading, setMarkingLoading] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false); // Scroll state
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     fetchLessonData();
@@ -61,13 +61,16 @@ const LessonView = () => {
     try {
       setMarkingLoading(true);
       await api.post("/users/lesson/complete-theory", { lessonId: id });
+
       setIsTheoryCompleted(true);
       await checkUser();
 
       toast.success("Theory marked as read! Quiz unlocked.");
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     } catch (error) {
-      toast.error("Error updating progress");
+      // Improved error logging
+      console.error("Mark Complete Error:", error.response || error);
+      toast.error(error.response?.data?.message || "Error updating progress");
     } finally {
       setMarkingLoading(false);
     }

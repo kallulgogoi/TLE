@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { LogOut, LayoutDashboard, BookOpen, Edit2 } from "lucide-react";
-import ProfileModal from "../Profile/ProfileModal"; // Import the modal
+import { LogOut, LayoutDashboard, BookOpen, Edit2, Trophy } from "lucide-react";
+import ProfileModal from "../Profile/ProfileModal";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // State for modal
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   if (!user) return null;
 
@@ -32,6 +32,13 @@ const Navbar = () => {
             >
               <LayoutDashboard size={18} />
               <span className="hidden sm:inline font-medium">Dashboard</span>
+            </Link>
+            <Link
+              to="/leaderboard"
+              className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors"
+            >
+              <Trophy size={18} />
+              <span className="hidden sm:inline font-medium">Leaderboard</span>
             </Link>
             <Link
               to="/subjects"

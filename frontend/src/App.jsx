@@ -9,6 +9,7 @@ import Navbar from "./components/Layout/Navbar";
 import Login from "./pages/Auth/Login";
 import AuthCallback from "./pages/Auth/AuthCallback";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Leaderboard from "./pages/Dashboard/Leaderboard";
 import SubjectDashboard from "./pages/Subject/SubjectDashboard";
 import SubjectList from "./pages/Subject/SubjectList";
 import LessonView from "./pages/Lesson/LessonView";
@@ -46,6 +47,7 @@ function App() {
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/subjects" element={<SubjectList />} />
                 <Route
                   path="/subject/:subjectId/dashboard"

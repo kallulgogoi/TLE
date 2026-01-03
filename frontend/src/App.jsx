@@ -19,6 +19,7 @@ import QuizResult from "./pages/Quiz/QuizResult";
 import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import ScrollToTop from "./components/ScrollToTop";
+import InterviewReview from "./pages/Interview/InterviewReview";
 function App() {
   return (
     <AuthProvider>
@@ -58,6 +59,10 @@ function App() {
                 <Route
                   path="/interview/:interviewId"
                   element={<InterviewPrep />}
+                />
+                <Route
+                  path="/interview/review/:id"
+                  element={<InterviewReview />}
                 />
                 <Route
                   path="/subject/:subjectId/dashboard"

@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { Toaster } from "react-hot-toast"; // <--- Import this
+import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/Layout/ProtectedRoute";
 import Navbar from "./components/Layout/Navbar";
 
@@ -12,14 +12,19 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Leaderboard from "./pages/Dashboard/Leaderboard";
 import SubjectDashboard from "./pages/Subject/SubjectDashboard";
 import SubjectList from "./pages/Subject/SubjectList";
+import InterviewPrep from "./pages/Interview/InterviewPrep";
 import LessonView from "./pages/Lesson/LessonView";
 import QuizView from "./pages/Quiz/QuizView";
 import QuizResult from "./pages/Quiz/QuizResult";
-
+import LandingPage from "./pages/LandingPage";
+import ProfilePage from "./pages/Profile/ProfilePage";
+import ScrollToTop from "./components/ScrollToTop";
+import InterviewReview from "./pages/Interview/InterviewReview";
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Toaster
           position="top-right"
           toastOptions={{
@@ -41,6 +46,7 @@ function App() {
           <Navbar />
           <div className="container mx-auto px-6 py-8 max-w-7xl">
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
 
@@ -48,7 +54,16 @@ function App() {
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/subjects" element={<SubjectList />} />
+                <Route
+                  path="/interview/:interviewId"
+                  element={<InterviewPrep />}
+                />
+                <Route
+                  path="/interview/review/:id"
+                  element={<InterviewReview />}
+                />
                 <Route
                   path="/subject/:subjectId/dashboard"
                   element={<SubjectDashboard />}

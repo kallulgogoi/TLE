@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 import {
   Camera,
   Save,
@@ -12,61 +13,23 @@ import {
   Target,
   Hexagon,
   User,
+  Star,
+  Flame,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-// --- SYSTEM BADGES CONFIGURATION ---
-// Defines all possible badges users can see (Locked vs Unlocked)
-const SYSTEM_BADGES = [
-  {
-    id: 1,
-    name: "Recruit",
-    minPoints: 0,
-    icon: User,
-    color: "text-gray-400",
-    desc: "Welcome to the agency.",
-  },
-  {
-    id: 2,
-    name: "Scout",
-    minPoints: 100,
-    icon: Target,
-    color: "text-blue-400",
-    desc: "First 100 XP earned.",
-  },
-  {
-    id: 3,
-    name: "Operative",
-    minPoints: 500,
-    icon: Zap,
-    color: "text-yellow-400",
-    desc: "500 XP. Getting serious.",
-  },
-  {
-    id: 4,
-    name: "Veteran",
-    minPoints: 1000,
-    icon: Shield,
-    color: "text-orange-500",
-    desc: "1000 XP. Battle hardened.",
-  },
-  {
-    id: 5,
-    name: "Elite",
-    minPoints: 2500,
-    icon: Hexagon,
-    color: "text-red-500",
-    desc: "2500 XP. Top 1% talent.",
-  },
-  {
-    id: 6,
-    name: "Legend",
-    minPoints: 5000,
-    icon: Trophy,
-    color: "text-purple-500",
-    desc: "5000 XP. The master algorithm.",
-  },
-];
+// Map backend icon strings to React Components
+const ICON_MAP = {
+  user: User,
+  target: Target,
+  zap: Zap,
+  shield: Shield,
+  hexagon: Hexagon,
+  trophy: Trophy,
+  star: Star,
+  flame: Flame,
+  default: Award,
+};
 
 const ProfilePage = () => {
   const { user, updateUserProfile } = useAuth();
@@ -75,13 +38,30 @@ const ProfilePage = () => {
   const [avatar, setAvatar] = useState(user?.avatar || "");
   const [loading, setLoading] = useState(false);
 
-  // Sync state if user reloads
+  // State for dynamic badges
+  const [badgeData, setBadgeData] = useState([]);
+  const [badgeLoading, setBadgeLoading] = useState(true);
+
   useEffect(() => {
     if (user) {
       setName(user.name);
       setAvatar(user.avatar);
+      fetchBadges();
     }
   }, [user]);
+
+  const fetchBadges = async () => {
+    try {
+      // Fetches all badges + progress status
+      const { data } = await api.get("/badges/progress");
+      setBadgeData(data);
+    } catch (error) {
+      console.error("Error fetching badges:", error);
+      // Don't toast error here to keep UI clean, just log it
+    } finally {
+      setBadgeLoading(false);
+    }
+  };
 
   const generateRandomAvatar = () => {
     const randomSeed = Math.random().toString(36).substring(7);
@@ -97,6 +77,7 @@ const ProfilePage = () => {
       toast.success("Identity updated successfully.");
     } catch (error) {
       console.error("Update failed", error);
+      toast.error("Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -131,7 +112,6 @@ const ProfilePage = () => {
           {/* --- LEFT COLUMN: IDENTITY CARD --- */}
           <div className="lg:col-span-1">
             <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-              {/* Background Decoration */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 rounded-full blur-[50px]"></div>
 
               <div className="relative z-10 flex flex-col items-center text-center">
@@ -212,7 +192,6 @@ const ProfilePage = () => {
                       LEVEL {user.level} OPERATIVE
                     </p>
 
-                    {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-4 w-full">
                       <div className="bg-black/40 p-4 rounded-2xl border border-gray-800">
                         <p className="text-gray-500 text-xs uppercase font-bold">
@@ -237,122 +216,113 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* --- RIGHT COLUMN: BADGES & ACHIEVEMENTS --- */}
+          {/* --- RIGHT COLUMN: DYNAMIC BADGES --- */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Progress Section */}
-            <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8">
-              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <Shield className="text-orange-500" /> Clearance Level Progress
-              </h3>
-              {/* Find current next badge */}
-              {(() => {
-                const nextBadge = SYSTEM_BADGES.find(
-                  (b) => user.points < b.minPoints
-                );
-                const currentBadge =
-                  [...SYSTEM_BADGES]
-                    .reverse()
-                    .find((b) => user.points >= b.minPoints) ||
-                  SYSTEM_BADGES[0];
-                const progress = nextBadge
-                  ? ((user.points - currentBadge.minPoints) /
-                      (nextBadge.minPoints - currentBadge.minPoints)) *
-                    100
-                  : 100;
-
-                return (
-                  <div>
-                    <div className="flex justify-between text-sm mb-2 font-bold">
-                      <span className={currentBadge.color}>
-                        {currentBadge.name}
-                      </span>
-                      <span className="text-gray-500">
-                        {nextBadge ? nextBadge.name : "MAX RANK"}
-                      </span>
-                    </div>
-                    <div className="h-4 bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-orange-600 to-red-600 transition-all duration-1000"
-                        style={{ width: `${Math.min(progress, 100)}%` }}
-                      ></div>
-                    </div>
-                    <p className="text-right text-xs text-gray-500 mt-2 font-mono">
-                      {nextBadge
-                        ? `${nextBadge.minPoints - user.points} XP TO PROMOTION`
-                        : "MAXIMUM CLEARANCE ACHIEVED"}
-                    </p>
-                  </div>
-                );
-              })()}
-            </div>
-
             {/* Badges Grid */}
             <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <Award className="text-yellow-500" /> Mission Badges
               </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {SYSTEM_BADGES.map((badge) => {
-                  const isUnlocked = user.points >= badge.minPoints;
-                  const Icon = badge.icon;
+              {badgeLoading ? (
+                <div className="text-center py-10 text-gray-500">
+                  <Loader2 className="animate-spin w-8 h-8 mx-auto mb-2" />
+                  Syncing achievements...
+                </div>
+              ) : badgeData.length === 0 ? (
+                <div className="text-center py-10 text-gray-500 bg-gray-800/30 rounded-2xl border border-dashed border-gray-700">
+                  No badges configured in system.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {badgeData.map((item) => {
+                    const { badge, earned, progress } = item;
+                    const IconComponent =
+                      ICON_MAP[badge.icon] || ICON_MAP.default;
 
-                  return (
-                    <div
-                      key={badge.id}
-                      className={`relative p-6 rounded-2xl border flex flex-col items-center text-center gap-3 transition-all duration-300 ${
-                        isUnlocked
-                          ? "bg-gray-800/50 border-gray-700 hover:border-orange-500/50 hover:bg-gray-800"
-                          : "bg-black/40 border-gray-800 opacity-60"
-                      }`}
-                    >
-                      {/* Icon Container */}
+                    // Determine rarity color
+                    const rarityColor =
+                      badge.rarity === "legendary"
+                        ? "text-purple-500"
+                        : badge.rarity === "epic"
+                        ? "text-orange-500"
+                        : badge.rarity === "rare"
+                        ? "text-blue-400"
+                        : "text-gray-400";
+
+                    return (
                       <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${
-                          isUnlocked
-                            ? "bg-gray-900 shadow-lg"
-                            : "bg-gray-900 grayscale"
+                        key={badge._id}
+                        className={`relative p-6 rounded-2xl border flex flex-col items-center text-center gap-3 transition-all duration-300 group ${
+                          earned
+                            ? "bg-gray-800/50 border-gray-700 hover:border-orange-500/50 hover:bg-gray-800"
+                            : "bg-black/40 border-gray-800 opacity-60"
                         }`}
                       >
-                        <Icon
-                          size={32}
-                          className={isUnlocked ? badge.color : "text-gray-600"}
-                        />
-                      </div>
-
-                      {/* Info */}
-                      <div>
-                        <h4
-                          className={`font-bold ${
-                            isUnlocked ? "text-white" : "text-gray-500"
+                        {/* Icon Container */}
+                        <div
+                          className={`w-16 h-16 rounded-full flex items-center justify-center mb-2 ${
+                            earned
+                              ? "bg-gray-900 shadow-lg"
+                              : "bg-gray-900 grayscale"
                           }`}
                         >
-                          {badge.name}
-                        </h4>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {badge.desc}
-                        </p>
+                          <IconComponent
+                            size={32}
+                            className={earned ? rarityColor : "text-gray-600"}
+                          />
+                        </div>
+
+                        {/* Info */}
+                        <div>
+                          <h4
+                            className={`font-bold ${
+                              earned ? "text-white" : "text-gray-500"
+                            }`}
+                          >
+                            {badge.name}
+                          </h4>
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                            {badge.description}
+                          </p>
+                        </div>
+
+                        {/* Lock Overlay */}
+                        {!earned && (
+                          <div className="absolute top-3 right-3 text-gray-600">
+                            <Lock size={16} />
+                          </div>
+                        )}
+
+                        {/* Requirement Label (Hover Effect) */}
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-[2px] flex flex-col items-center justify-center rounded-2xl opacity-0 hover:opacity-100 transition-opacity p-4">
+                          {!earned ? (
+                            <>
+                              <span className="text-orange-500 text-xs font-bold uppercase mb-1">
+                                Locked
+                              </span>
+                              <div className="w-full bg-gray-700 h-1.5 rounded-full mb-2">
+                                <div
+                                  className="bg-orange-500 h-1.5 rounded-full"
+                                  style={{ width: `${progress.percentage}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-white text-xs">
+                                {progress.current} / {progress.target}{" "}
+                                {badge.criteria === "points" ? "XP" : ""}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-green-500 font-bold text-sm flex items-center gap-1">
+                              <Award size={14} /> UNLOCKED
+                            </span>
+                          )}
+                        </div>
                       </div>
-
-                      {/* Lock Overlay */}
-                      {!isUnlocked && (
-                        <div className="absolute top-3 right-3 text-gray-600">
-                          <Lock size={16} />
-                        </div>
-                      )}
-
-                      {/* XP Requirement Label (if locked) */}
-                      {!isUnlocked && (
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center rounded-2xl opacity-0 hover:opacity-100 transition-opacity">
-                          <span className="bg-black border border-gray-700 text-orange-500 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                            <Lock size={10} /> {badge.minPoints} XP
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -46,8 +46,8 @@ const LessonView = () => {
 
   if (loading)
     return (
-      <div className="flex h-screen items-center justify-center bg-black">
-        <div className="text-orange-500 text-2xl font-mono animate-pulse">
+      <div className="flex h-[100dvh] items-center justify-center bg-black px-6 text-center">
+        <div className="text-orange-500 text-lg sm:text-2xl font-mono animate-pulse tracking-tighter">
           LOADING MISSION DATA...
         </div>
       </div>
@@ -55,8 +55,8 @@ const LessonView = () => {
 
   if (!lesson)
     return (
-      <div className="flex h-screen items-center justify-center bg-black">
-        <div className="text-red-500 text-xl font-mono">
+      <div className="flex h-[100dvh] items-center justify-center bg-black px-6 text-center">
+        <div className="text-red-500 text-lg sm:text-xl font-mono">
           DATA CORRUPTED OR MISSING
         </div>
       </div>
@@ -65,26 +65,30 @@ const LessonView = () => {
   return (
     <>
       <div className="min-h-screen bg-black text-gray-100 relative overflow-hidden">
+        {/* Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-900/5 via-transparent to-cyan-900/5 pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_99%,rgba(234,88,12,0.05)_100%)] animate-scan pointer-events-none" />
 
-        <div className="w-full max-w-5xl mx-auto py-12 px-6 relative z-10">
+        <div className="w-full max-w-5xl mx-auto py-8 sm:py-12 px-4 sm:px-6 relative z-10">
+          {/* Back Button - Scaled for touch */}
           <button
             onClick={() => navigate(-1)}
-            className="mb-10 flex items-center gap-2 text-gray-500 hover:text-orange-400 transition-all duration-300 font-mono text-sm uppercase tracking-wider hover:scale-105"
+            className="mb-6 sm:mb-10 flex items-center gap-2 text-gray-500 hover:text-orange-400 transition-all duration-300 font-mono text-xs sm:text-sm uppercase tracking-wider p-2"
           >
             <ArrowLeft size={18} />
-            Abort Mission
+            <span className="hidden sm:inline">Abort Mission</span>
+            <span className="sm:hidden">Abort</span>
           </button>
 
-          <div className="bg-gray-950/80 backdrop-blur-xl rounded-3xl border border-gray-800 shadow-2xl overflow-hidden">
-            <div className="p-12 border-b border-gray-800 bg-gradient-to-r from-orange-950/20 to-transparent">
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-orange-900/30 border border-orange-700/50 rounded-full text-orange-400 font-mono text-xs uppercase tracking-wider">
-                  <Target size={14} />
+          <div className="bg-gray-950/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-gray-800 shadow-2xl overflow-hidden">
+            {/* Header Section - Responsive Padding & Text */}
+            <div className="p-6 sm:p-12 border-b border-gray-800 bg-gradient-to-r from-orange-950/20 to-transparent">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-orange-900/30 border border-orange-700/50 rounded-full text-orange-400 font-mono text-[10px] sm:text-xs uppercase tracking-wider">
+                  <Target size={12} className="sm:w-3.5 sm:h-3.5" />
                   Level {lesson.level}
                 </span>
-                <span className="text-gray-500 font-mono text-xs uppercase">
+                <span className="text-gray-500 font-mono text-[10px] sm:text-xs uppercase">
                   Difficulty:{" "}
                   <span
                     className={
@@ -104,47 +108,40 @@ const LessonView = () => {
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 drop-shadow-lg">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-black uppercase tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-600 drop-shadow-lg leading-tight">
                 {lesson.title}
               </h1>
             </div>
 
-            <div className="p-12 prose prose-invert prose-lg max-w-none">
+            {/* Markdown Content - Responsive Proximity & Text Scaling */}
+            <div className="p-6 sm:p-12 prose prose-invert prose-sm sm:prose-lg max-w-none">
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => (
-                    <h1 className="text-3xl font-bold mt-12 mb-6 text-white border-l-4 border-orange-500 pl-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold mt-8 sm:mt-12 mb-4 sm:mb-6 text-white border-l-4 border-orange-500 pl-4 sm:pl-6">
                       {children}
                     </h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className="text-2xl font-bold mt-10 mb-5 text-orange-400 uppercase tracking-wide font-mono flex items-center gap-3">
+                    <h2 className="text-xl sm:text-2xl font-bold mt-6 sm:mt-10 mb-3 sm:mb-5 text-orange-400 uppercase tracking-wide font-mono flex items-center gap-2 sm:gap-3">
                       <span className="text-cyan-400">&gt;</span> {children}
                     </h2>
                   ),
-                  h3: ({ children }) => (
-                    <h3 className="text-xl font-semibold mt-8 mb-4 text-gray-300">
-                      {children}
-                    </h3>
-                  ),
                   p: ({ children }) => (
-                    <p className="mb-6 leading-relaxed text-gray-300 text-lg">
+                    <p className="mb-4 sm:mb-6 leading-relaxed text-gray-300 text-base sm:text-lg">
                       {children}
                     </p>
                   ),
                   ul: ({ children }) => (
-                    <ul className="list-none space-y-3 mb-8 pl-4">
+                    <ul className="list-none space-y-2 sm:space-y-3 mb-6 sm:mb-8 pl-2 sm:pl-4">
                       {children}
                     </ul>
                   ),
                   li: ({ children }) => (
-                    <li className="flex items-start gap-3 text-gray-300">
-                      <span className="text-orange-500 mt-2">▸</span>
+                    <li className="flex items-start gap-2 sm:gap-3 text-gray-300 text-sm sm:text-lg">
+                      <span className="text-orange-500 mt-1.5">▸</span>
                       <span>{children}</span>
                     </li>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="text-white font-bold">{children}</strong>
                   ),
                 }}
               >
@@ -152,33 +149,36 @@ const LessonView = () => {
               </ReactMarkdown>
             </div>
 
-            <div className="p-12 bg-gradient-to-r from-gray-950/90 via-black/80 to-gray-950/90 border-t border-orange-500/20 relative overflow-hidden">
+            {/* Action Footer - Fluid Buttons */}
+            <div className="p-6 sm:p-12 bg-gradient-to-r from-gray-950/90 via-black/80 to-gray-950/90 border-t border-orange-500/20 relative overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(234,88,12,0.1),transparent_50%)] animate-pulse" />
 
               {lesson.quiz ? (
                 <button
                   onClick={() => navigate(`/quiz/start/${lesson._id}`)}
-                  className="group relative flex items-center gap-4 px-10 py-6 bg-gradient-to-r from-orange-600 via-orange-500 to-red-600 text-black font-black uppercase tracking-widest text-lg overflow-hidden border-2 border-orange-400/50 shadow-2xl hover:shadow-orange-500/50 transition-all duration-500 hover:scale-[1.02] hover:-rotate-1 active:scale-[0.98] backdrop-blur-sm"
+                  className="group relative w-full sm:w-auto flex items-center justify-center gap-3 sm:gap-4 px-6 py-4 sm:px-10 sm:py-6 bg-gradient-to-r from-orange-600 via-orange-500 to-red-600 text-black font-black uppercase tracking-widest text-base sm:text-lg overflow-hidden border-2 border-orange-400/50 shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] rounded-xl sm:rounded-none"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent -skew-x-3 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-orange-400/30 via-transparent to-orange-400/30 -skew-x-3" />
 
                   <BrainCircuit
-                    size={28}
-                    className="relative z-10 drop-shadow-lg group-hover:animate-spin-slow group-hover:scale-110 transition-all duration-500"
+                    size={24}
+                    className="relative z-10 sm:w-7 sm:h-7 group-hover:animate-spin-slow transition-all"
                   />
-                  <span className="relative z-10 flex items-center gap-2">
-                    <span className="text-sm tracking-widest">EXECUTE</span>
-                    <span className="text-xl">ASSESSMENT</span>
+                  <span className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:gap-2 leading-none">
+                    <span className="text-[10px] sm:text-sm tracking-tighter sm:tracking-widest opacity-80 sm:opacity-100">
+                      EXECUTE
+                    </span>
+                    <span className="text-lg sm:text-xl">ASSESSMENT</span>
                   </span>
-
-                  <div className="absolute right-4 w-8 h-8 bg-white/20 rounded-full group-hover:scale-150 transition-all duration-500" />
                 </button>
               ) : (
-                <div className="group relative flex items-center gap-4 px-10 py-6 bg-gradient-to-r from-red-900/40 to-red-950/60 backdrop-blur-md border border-red-800/50 rounded-2xl font-mono text-lg text-red-300 shadow-xl hover:shadow-red-500/30 transition-all duration-300 hover:scale-105 hover:bg-red-900/60">
-                  <AlertTriangle size={24} className="animate-pulse" />
-                  <span className="uppercase tracking-widest border-l-2 border-red-600/50 pl-4 pr-2">
-                    ASSESSMENT OFFLINE
+                <div className="group relative w-full sm:w-auto flex items-center justify-center gap-4 px-6 py-4 sm:px-10 sm:py-6 bg-red-950/40 backdrop-blur-md border border-red-800/50 rounded-xl sm:rounded-2xl font-mono text-sm sm:text-lg text-red-300 transition-all duration-300">
+                  <AlertTriangle
+                    size={20}
+                    className="animate-pulse sm:w-6 sm:h-6"
+                  />
+                  <span className="uppercase tracking-widest border-l-2 border-red-600/50 pl-4">
+                    OFFLINE
                   </span>
                 </div>
               )}
@@ -186,15 +186,13 @@ const LessonView = () => {
           </div>
         </div>
 
+        {/* Scroll To Top - Adjusted for thumb reach */}
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 group p-4 bg-gradient-to-br from-orange-600/90 to-orange-700/90 hover:from-orange-500 hover:to-orange-600 text-black rounded-2xl shadow-2xl hover:shadow-orange-500/50 transition-all duration-300 hover:scale-110 active:scale-95 border border-orange-400/50 backdrop-blur-sm z-50"
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 group p-3 sm:p-4 bg-orange-600/90 text-black rounded-xl sm:rounded-2xl shadow-2xl transition-all active:scale-90 border border-orange-400/50 backdrop-blur-sm z-50"
           >
-            <ArrowUp
-              size={22}
-              className="group-hover:rotate-180 transition-transform duration-300"
-            />
+            <ArrowUp size={20} className="sm:w-[22px] sm:h-[22px]" />
           </button>
         )}
       </div>

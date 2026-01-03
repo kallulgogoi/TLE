@@ -76,5 +76,6 @@
     "mongodb"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "type": "commonjs"
 }

@@ -95,10 +95,6 @@ const Dashboard = () => {
               }
               className="group bg-gray-900 rounded-3xl border border-gray-800 p-8 cursor-pointer hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden hover:shadow-2xl hover:shadow-black"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <BookOpen size={100} className="text-white" />
-              </div>
-
               <div className="flex items-start justify-between mb-8 relative z-10">
                 <div className="bg-gray-800 p-4 rounded-2xl group-hover:bg-orange-600 transition-colors duration-300 border border-gray-700 group-hover:border-orange-500">
                   <img
@@ -117,7 +113,7 @@ const Dashboard = () => {
                   className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                     item.isCompleted
                       ? "bg-green-900/30 text-green-400 border border-green-800"
-                      : "bg-blue-900/30 text-blue-400 border border-blue-800"
+                      : "bg-orange-900/30 text-orange-400 border border-orange-800"
                   }`}
                 >
                   {item.isCompleted ? "Completed" : "Active"}

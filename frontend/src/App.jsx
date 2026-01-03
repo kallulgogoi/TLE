@@ -12,16 +12,18 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Leaderboard from "./pages/Dashboard/Leaderboard";
 import SubjectDashboard from "./pages/Subject/SubjectDashboard";
 import SubjectList from "./pages/Subject/SubjectList";
+import InterviewPrep from "./pages/Interview/InterviewPrep";
 import LessonView from "./pages/Lesson/LessonView";
 import QuizView from "./pages/Quiz/QuizView";
 import QuizResult from "./pages/Quiz/QuizResult";
 import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
-
+import ScrollToTop from "./components/ScrollToTop";
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Toaster
           position="top-right"
           toastOptions={{
@@ -53,6 +55,10 @@ function App() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/subjects" element={<SubjectList />} />
+                <Route
+                  path="/interview/:interviewId"
+                  element={<InterviewPrep />}
+                />
                 <Route
                   path="/subject/:subjectId/dashboard"
                   element={<SubjectDashboard />}

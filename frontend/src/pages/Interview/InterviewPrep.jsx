@@ -1,186 +1,144 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { Mic, Send, Play, CheckCircle } from "lucide-react";
+import { ChevronRight, Loader2, CheckCircle, XCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 const InterviewPrep = () => {
-  const { subjectId } = useParams();
+  const { interviewId } = useParams();
   const navigate = useNavigate();
   const [interview, setInterview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answer, setAnswer] = useState("");
-  const [feedback, setFeedback] = useState(null);
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [selectedOpt, setSelectedOpt] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [results, setResults] = useState([]);
+  const [showReview, setShowReview] = useState(false);
 
-  const generateInterview = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.post(
-        `/interviews/subject/${subjectId}/generate`
-      );
-      // Auto-start the interview after generation
-      const startRes = await api.post(`/interviews/${data.interview.id}/start`);
-      setInterview(startRes.data.interview);
-    } catch (error) {
-      console.error("Error generating interview", error);
-      alert(
-        "Please ensure you have completed all lessons in this subject first."
-      );
-      navigate("/dashboard");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    api
+      .get(`/interviews/${interviewId}`)
+      .then((res) => {
+        setInterview(res.data);
+        setLoading(false);
+      })
+      .catch(() => navigate("/dashboard"));
+  }, [interviewId]);
 
-  const submitAnswer = async () => {
-    if (!answer.trim()) return;
+  const handleAnswer = async () => {
+    const question = interview.questions[currentIdx];
+    const isCorrect = selectedOpt === question.correctAnswer;
 
-    // In a real app, this would go to backend for AI analysis
-    // For this demo UI, we'll just simulate moving to next question locally
-    // unless you implemented the full backend logic
+    const newResult = {
+      questionId: question._id,
+      selectedOption: selectedOpt,
+      isCorrect,
+    };
 
-    try {
-      const currentQ = interview.questions[currentQuestionIndex];
-      await api.post(`/interviews/${interview.id}/answer`, {
-        questionId: currentQ.id,
-        answer: answer,
-        timeTaken: 60, // Mock time
+    const updatedResults = [...results, newResult];
+    setResults(updatedResults);
+
+    if (currentIdx < interview.questions.length - 1) {
+      setCurrentIdx(currentIdx + 1);
+      setSelectedOpt(null);
+    } else {
+      await api.post(`/interviews/${interviewId}/submit`, {
+        answers: updatedResults,
       });
-
-      setAnswer("");
-
-      if (currentQuestionIndex < interview.questions.length - 1) {
-        setCurrentQuestionIndex((prev) => prev + 1);
-      } else {
-        finishInterview();
-      }
-    } catch (error) {
-      console.error("Error submitting answer", error);
-    }
-  };
-
-  const finishInterview = async () => {
-    try {
-      const { data } = await api.post(`/interviews/${interview.id}/complete`);
-      setFeedback(data.results);
-    } catch (error) {
-      console.error("Error completing interview", error);
+      setShowReview(true);
     }
   };
 
   if (loading)
     return (
-      <div className="p-10 text-center">
-        Generating AI Interview Questions...
+      <div className="p-20 text-orange-500 font-mono">
+        LOADING MCQ INTERVIEW...
       </div>
     );
 
-  if (!interview && !feedback) {
+  if (showReview) {
     return (
-      <div className="max-w-2xl mx-auto text-center mt-10">
-        <div className="bg-white p-10 rounded-xl shadow-lg">
-          <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Mic className="w-8 h-8 text-indigo-600" />
-          </div>
-          <h1 className="text-3xl font-bold mb-4">AI Interview Prep</h1>
-          <p className="text-gray-600 mb-8">
-            Ready to test your knowledge? Our AI will generate custom questions
-            based on your skill level. Speak or type your answers to get instant
-            feedback.
-          </p>
-          <button
-            onClick={generateInterview}
-            className="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-700 transition-all flex items-center gap-2 mx-auto"
-          >
-            <Play className="w-5 h-5" />
-            Start Interview Session
-          </button>
+      <div className="max-w-4xl mx-auto py-10">
+        <h1 className="text-3xl font-black text-white mb-8 underline decoration-orange-500">
+          FINAL EVALUATION REPORT
+        </h1>
+        <div className="space-y-4">
+          {interview.questions.map((q, i) => {
+            const res = results[i];
+            return (
+              <div
+                key={i}
+                className={`p-5 rounded-xl border ${
+                  res.isCorrect
+                    ? "border-green-900/30 bg-green-900/5"
+                    : "border-red-900/30 bg-red-900/5"
+                }`}
+              >
+                <p className="text-white font-bold mb-2">{q.question}</p>
+                <p
+                  className={`text-sm ${
+                    res.isCorrect ? "text-green-400" : "text-red-400"
+                  }`}
+                >
+                  Your Answer: {q.options[res.selectedOption]}
+                  {res.isCorrect
+                    ? " (Correct)"
+                    : ` (Correct was: ${q.options[q.correctAnswer]})`}
+                </p>
+                <p className="text-gray-500 text-xs mt-2 italic">
+                  {q.explanation}
+                </p>
+              </div>
+            );
+          })}
         </div>
-      </div>
-    );
-  }
-
-  if (feedback) {
-    return (
-      <div className="max-w-3xl mx-auto mt-10">
-        <div className="bg-white p-8 rounded-xl shadow-lg">
-          <div className="flex items-center gap-3 mb-6 text-green-600">
-            <CheckCircle className="w-8 h-8" />
-            <h2 className="text-2xl font-bold">Interview Completed</h2>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <span className="block text-sm text-gray-500">Total Score</span>
-              <span className="text-2xl font-bold text-indigo-600">
-                {feedback.totalScore}
-              </span>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <span className="block text-sm text-gray-500">XP Earned</span>
-              <span className="text-2xl font-bold text-yellow-600">
-                +{feedback.pointsEarned}
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 p-6 rounded-lg mb-8">
-            <h3 className="font-bold mb-2">AI Feedback</h3>
-            <p className="text-gray-700 italic">"{feedback.feedback}"</p>
-          </div>
-
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="w-full bg-gray-900 text-white py-3 rounded-lg font-bold"
-          >
-            Return to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const question = interview.questions[currentQuestionIndex];
-
-  return (
-    <div className="max-w-3xl mx-auto mt-6">
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-sm font-bold text-gray-500">
-          Question {currentQuestionIndex + 1} of {interview.questions.length}
-        </span>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-            question.difficulty === "hard"
-              ? "bg-red-100 text-red-700"
-              : question.difficulty === "medium"
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          {question.difficulty}
-        </span>
-      </div>
-
-      <div className="bg-white p-8 rounded-xl shadow-md mb-6">
-        <h2 className="text-xl font-medium mb-2">{question.question}</h2>
-        <p className="text-sm text-gray-400">Topic: {question.topic}</p>
-      </div>
-
-      <div className="relative">
-        <textarea
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          placeholder="Type your answer here..."
-          className="w-full h-48 p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-        />
         <button
-          onClick={submitAnswer}
-          disabled={!answer.trim()}
-          className="absolute bottom-4 right-4 bg-indigo-600 text-white p-2 rounded-lg disabled:opacity-50 hover:bg-indigo-700"
+          onClick={() => navigate("/dashboard")}
+          className="mt-8 w-full py-4 bg-orange-600 font-black"
         >
-          <Send className="w-5 h-5" />
+          EXIT EVALUATION
         </button>
       </div>
+    );
+  }
+
+  const q = interview.questions[currentIdx];
+
+  return (
+    <div className="max-w-3xl mx-auto py-12">
+      <div className="mb-8 flex justify-between font-mono">
+        <span className="text-orange-500">QUESTION {currentIdx + 1}/30</span>
+      </div>
+
+      <div className="bg-gray-900 p-8 rounded-2xl border-l-4 border-orange-600 mb-8">
+        <h2 className="text-xl text-white font-medium">{q.question}</h2>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {q.options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => setSelectedOpt(i)}
+            className={`p-5 text-left rounded-xl border-2 transition-all ${
+              selectedOpt === i
+                ? "border-orange-500 bg-orange-500/10 text-white"
+                : "border-gray-800 text-gray-400 hover:border-gray-600"
+            }`}
+          >
+            <span className="mr-4 font-mono text-orange-500">
+              {String.fromCharCode(65 + i)}.
+            </span>{" "}
+            {opt}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={handleAnswer}
+        disabled={selectedOpt === null}
+        className="mt-8 w-full py-5 bg-orange-600 text-black font-black uppercase tracking-widest disabled:opacity-20 transition-all flex items-center justify-center gap-2"
+      >
+        CONFIRM & NEXT <ChevronRight size={20} />
+      </button>
     </div>
   );
 };

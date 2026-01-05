@@ -1,4 +1,3 @@
-// server/models/Quiz.js
 const mongoose = require("mongoose");
 
 const questionSchema = new mongoose.Schema({
@@ -48,7 +47,7 @@ const quizSchema = new mongoose.Schema({
   },
   passingScore: {
     type: Number,
-    default: 50, // Changed to 50 as per adaptive logic
+    default: 40,
   },
   isActive: {
     type: Boolean,

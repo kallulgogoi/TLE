@@ -52,7 +52,7 @@ const SubjectDashboard = () => {
         const prog = data.userProgress;
         setUserProgress({
           currentLevel: prog.currentLevel || 1,
-          totalQuizzes: prog.totalAttempts || prog.totalQuizzes || 0,
+          totalQuizzes: prog.totalQuizzes || 0,
           accuracy: prog.accuracy || 0,
           completedLessons: prog.completedLessons || [],
         });
@@ -65,7 +65,6 @@ const SubjectDashboard = () => {
       setLoading(false);
     }
   };
-
   const handleSaveRating = async () => {
     if (rating < 1 || rating > 10) {
       toast.error("Rating must be between 1 and 10");
@@ -113,7 +112,6 @@ const SubjectDashboard = () => {
   return (
     <div className="min-h-screen bg-black text-gray-100 font-sans overflow-x-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
-        {/* Back Button - Bigger tap target for mobile */}
         <button
           onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2 text-gray-500 hover:text-orange-500 transition-colors text-xs sm:text-sm mb-6 sm:mb-8 py-2"
@@ -203,7 +201,7 @@ const SubjectDashboard = () => {
             </div>
             <div className="h-2.5 sm:h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
               <div
-                className="h-full bg-gradient-to-r from-orange-700 to-orange-500 rounded-full transition-all duration-1000"
+                className="h-full bg-linear-to-r from-orange-700 to-orange-500 rounded-full transition-all duration-1000"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -291,7 +289,7 @@ const SubjectDashboard = () => {
                   >
                     <div className="flex items-center gap-3 sm:gap-6 flex-1 min-w-0">
                       <div
-                        className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl flex-shrink-0 flex items-center justify-center font-black text-sm sm:text-xl border-2 transition-colors ${
+                        className={`w-10 h-10 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl shrink-0 flex items-center justify-center font-black text-sm sm:text-xl border-2 transition-colors ${
                           isCompleted
                             ? "border-green-500 text-green-500 bg-green-500/10"
                             : "border-orange-500 text-orange-500 bg-orange-500/10 group-hover:bg-orange-500 group-hover:text-black"
@@ -320,7 +318,7 @@ const SubjectDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="flex-shrink-0 ml-3">
+                    <div className="shrink-0 ml-3">
                       {isLockedLesson ? (
                         <Lock className="w-5 h-5 text-gray-700" />
                       ) : (
@@ -336,8 +334,6 @@ const SubjectDashboard = () => {
           </div>
         </div>
       </div>
-
-      {/* Floating Scroll Top - Adjusted for mobile position */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

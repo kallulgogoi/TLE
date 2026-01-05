@@ -54,14 +54,12 @@ const userSchema = new mongoose.Schema({
         type: Number,
         min: 1,
         max: 10,
-        default: 1, // Default rating is 1
+        default: 1,
       },
-      // --- NEW FIELD: Tracks if the user has locked their rating ---
       hasSetRating: {
         type: Boolean,
-        default: false, // Starts as false, becomes true after they set it
+        default: false,
       },
-      // -------------------------------------------------------------
       currentLevel: {
         type: Number,
         default: 1,
@@ -70,14 +68,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
-      // Tracks lessons where theory is read
       theoryCompletedLessons: [
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Lesson",
         },
       ],
-      // Tracks lessons where quiz is passed
       completedLessons: [
         {
           type: mongoose.Schema.Types.ObjectId,
@@ -112,8 +108,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
   },
 });
-
-// Update streak method
 userSchema.methods.updateStreak = function () {
   const today = new Date();
   const lastActive = this.streak.lastActive

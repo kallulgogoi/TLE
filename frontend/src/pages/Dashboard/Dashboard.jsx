@@ -203,9 +203,8 @@ const Dashboard = () => {
         <div className="pt-6 md:pt-10">
           <div className="flex items-center gap-3 mb-6 md:mb-8">
             <CheckCircle
-              className="text-green-500"
+              className="text-green-500 md:w-6 md:h-6"
               size={20}
-              className="md:w-6 md:h-6"
             />
             <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter italic">
               Archive: History

@@ -29,6 +29,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  const refreshUser = async () => {
+    try {
+      const { data } = await api.get("/auth/me");
+      setUser(data);
+      return data;
+    } catch (error) {
+      console.error("Failed to sync user stats", error);
+    }
+  };
 
   const login = async (token) => {
     localStorage.setItem("token", token);
@@ -40,12 +49,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     window.location.href = "/login";
   };
+
   const updateUserProfile = async (updates) => {
     try {
       const { data } = await api.put("/users/profile", updates);
       setUser(data.user);
       toast.success("Profile updated successfully!");
-      return true;
+      return data.user;
     } catch (error) {
       console.error("Profile update failed", error);
       toast.error(error.response?.data?.message || "Failed to update profile");
@@ -55,7 +65,15 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, loading, checkUser, updateUserProfile }}
+      value={{
+        user,
+        login,
+        logout,
+        loading,
+        checkUser,
+        refreshUser,
+        updateUserProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>

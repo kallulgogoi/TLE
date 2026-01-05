@@ -2,21 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Confetti from "react-confetti";
-import {
-  CheckCircle,
-  XCircle,
-  ArrowRight,
-  RotateCcw,
-  Home,
-} from "lucide-react";
+import { CheckCircle, XCircle, RotateCcw, Home, Info } from "lucide-react";
+import toast from "react-hot-toast";
 
 const QuizResult = () => {
   const { attemptId } = useParams();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // Screen size state for Confetti responsiveness
   const [windowSize, setWindowSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -32,6 +25,23 @@ const QuizResult = () => {
       try {
         const { data } = await api.get(`/quizzes/results/${attemptId}`);
         setResult(data);
+
+        if (data.quizAttempt.score < 40) {
+          toast.error("MISSION FAILED: Score below 40%. Re-attempt required.", {
+            duration: 5000,
+            icon: "⚠️",
+            style: {
+              borderRadius: "10px",
+              background: "#111",
+              color: "#ef4444",
+              border: "1px solid #ef4444",
+              fontSize: "14px",
+              fontWeight: "bold",
+            },
+          });
+        } else {
+          toast.success("MISSION ACCOMPLISHED!");
+        }
       } catch (error) {
         console.error("Error fetching results:", error);
       } finally {
@@ -44,190 +54,189 @@ const QuizResult = () => {
 
   if (loading)
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 text-center text-gray-500 font-mono animate-pulse">
+      <div className="min-h-dvh flex items-center justify-center p-6 text-center text-orange-500 font-mono animate-pulse">
         Calculating performance metrics...
       </div>
     );
-  if (!result)
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 text-center text-red-500 font-mono">
-        Result unavailable.
-      </div>
-    );
+
+  if (!result) return null;
 
   const { quizAttempt, detailedResults } = result;
-  const passed = quizAttempt.isPassed;
+  const passed = quizAttempt.score >= 40;
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 mb-20 px-4 sm:px-6 text-center">
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 mb-20 px-4 sm:px-6">
       {passed && (
         <Confetti
           width={windowSize.width}
           height={windowSize.height}
           recycle={false}
-          numberOfPieces={windowSize.width < 640 ? 200 : 500}
+          numberOfPieces={500}
           colors={["#F97316", "#EA580C", "#FFFFFF"]}
         />
       )}
-
-      {/* RESULT CARD */}
-      <div className="bg-gray-900 p-6 sm:p-12 rounded-3xl shadow-2xl border border-gray-800 relative overflow-hidden">
-        {/* Glow Effect */}
+      <div className="bg-gray-900 rounded-[2.5rem] border border-gray-800 relative overflow-hidden shadow-2xl">
         <div
-          className={`absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-gradient-to-b opacity-20 blur-3xl rounded-full ${
-            passed ? "from-green-500" : "from-red-500"
+          className={`absolute top-0 left-0 w-full h-2 ${
+            passed ? "bg-green-500" : "bg-red-500"
           }`}
         ></div>
 
-        <div
-          className={`inline-block p-4 sm:p-6 rounded-full mb-6 sm:mb-8 relative z-10 ${
-            passed
-              ? "bg-green-900/30 border-green-800"
-              : "bg-red-900/30 border-red-800"
-          } border`}
-        >
-          <span className="text-4xl sm:text-5xl">{passed ? "🎉" : "⚠️"}</span>
-        </div>
-
-        <h1 className="text-3xl sm:text-5xl font-extrabold mb-3 sm:mb-4 text-white relative z-10 leading-tight">
-          {passed ? "Mission Accomplished!" : "Mission Failed"}
-        </h1>
-
-        <p className="text-gray-400 mb-8 sm:mb-10 text-base sm:text-lg relative z-10">
-          Score:{" "}
-          <span
-            className={`font-bold ${
-              passed ? "text-green-400" : "text-red-400"
+        <div className="p-8 sm:p-14 text-center">
+          <div
+            className={`inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 border-2 ${
+              passed
+                ? "bg-green-500/10 text-green-500 border-green-500/20"
+                : "bg-red-500/10 text-red-500 border-red-500/20"
             }`}
           >
-            {quizAttempt.score.toFixed(0)}%
-          </span>
-          {passed && (
-            <span className="text-white block sm:inline">
-              <span className="hidden sm:inline"> • </span>+
-              {quizAttempt.pointsEarned} XP Awarded
-            </span>
-          )}
-        </p>
-
-        {/* STATS GRID: Stacks on small mobile, 3-col on tablets */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-10 sm:mb-12 max-w-2xl mx-auto relative z-10">
-          <div className="bg-gray-800 p-4 sm:p-6 rounded-2xl border border-gray-700">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-              {quizAttempt.correctAnswers}/{quizAttempt.totalQuestions}
-            </div>
-            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-              Correct
-            </div>
+            {passed ? <CheckCircle size={48} /> : <XCircle size={48} />}
           </div>
-          <div className="bg-gray-800 p-4 sm:p-6 rounded-2xl border border-gray-700">
-            <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-              {quizAttempt.accuracy.toFixed(0)}%
-            </div>
-            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-              Accuracy
-            </div>
-          </div>
-          <div className="bg-gray-800 p-4 sm:p-6 rounded-2xl border border-gray-700">
-            <div className="text-2xl sm:text-3xl font-bold text-yellow-500 mb-1">
-              +{quizAttempt.pointsEarned}
-            </div>
-            <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-              XP Gained
-            </div>
-          </div>
-        </div>
 
-        {/* ACTION BUTTONS: Column on mobile, Row on tablet */}
-        <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 relative z-10">
-          <Link
-            to="/dashboard"
-            className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold border border-gray-700 hover:bg-gray-800 text-gray-300 transition-colors order-2 sm:order-1"
-          >
-            <Home size={20} /> Dashboard
-          </Link>
+          <h1 className="text-4xl sm:text-6xl font-black mb-4 text-white tracking-tighter uppercase italic leading-none">
+            {passed ? "Mission Success" : "Mission Failed"}
+          </h1>
 
-          {passed ? (
-            <button
-              onClick={() =>
-                navigate(`/subject/${quizAttempt.subject}/dashboard`)
-              }
-              className="flex items-center justify-center gap-2 bg-orange-600 text-black px-10 py-4 rounded-xl font-bold hover:bg-orange-500 shadow-lg active:scale-95 transition-all order-1 sm:order-2"
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <div
+              className={`px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest ${
+                passed
+                  ? "bg-green-500 text-black"
+                  : "bg-red-500 text-white animate-pulse"
+              }`}
             >
-              Continue Mission <ArrowRight size={20} />
-            </button>
-          ) : (
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center justify-center gap-2 bg-white text-black px-10 py-4 rounded-xl font-bold hover:bg-gray-200 shadow-lg active:scale-95 transition-all order-1 sm:order-2"
+              {passed ? "Qualified" : "Disqualified"}
+            </div>
+            <div className="text-gray-400 font-mono text-lg">
+              SCORE:{" "}
+              <span className={passed ? "text-green-400" : "text-red-400"}>
+                {quizAttempt.score.toFixed(0)}%
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-12">
+            <div className="bg-black/40 p-6 rounded-3xl border border-gray-800">
+              <div className="text-3xl font-black text-white">
+                {quizAttempt.correctAnswers}/{quizAttempt.totalQuestions}
+              </div>
+              <div className="text-[10px] text-gray-500 font-black uppercase">
+                Accuracy
+              </div>
+            </div>
+            <div className="bg-black/40 p-6 rounded-3xl border border-gray-800">
+              <div className="text-3xl font-black text-yellow-500">
+                +{quizAttempt.pointsEarned}
+              </div>
+              <div className="text-[10px] text-gray-500 font-black uppercase">
+                XP Gained
+              </div>
+            </div>
+            <div className="col-span-2 sm:col-span-1 bg-black/40 p-6 rounded-3xl border border-gray-800">
+              <div className="text-3xl font-black text-blue-400">
+                {Math.floor(quizAttempt.timeTaken / 60)}m
+              </div>
+              <div className="text-[10px] text-gray-500 font-black uppercase">
+                Time Taken
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link
+              to="/dashboard"
+              className="flex items-center justify-center gap-2 px-8 py-5 rounded-2xl font-black uppercase text-xs border-2 border-gray-800 hover:bg-gray-800 text-gray-300 transition-all"
             >
-              <RotateCcw size={20} /> Retry Level
-            </button>
-          )}
+              <Home size={18} /> Exit to Base
+            </Link>
+
+            {!passed && (
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center gap-2 bg-white text-black px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-orange-500 shadow-xl active:scale-95 transition-all"
+              >
+                <RotateCcw size={18} /> Re-Initialize Mission
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* DEBRIEFING SECTION */}
-      <div className="mt-12 text-left">
-        <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white flex items-center gap-3">
-          <div className="w-1 h-6 sm:h-8 bg-orange-500 rounded-full"></div>
-          Debriefing & Analysis
+      <div className="mt-16 px-4 text-left">
+        <h2 className="text-2xl font-black text-white uppercase italic flex items-center gap-3 mb-8">
+          <span className="w-2 h-8 bg-orange-600 rounded-full"></span>
+          Mission Debrief
         </h2>
 
-        <div className="space-y-4 sm:space-y-6">
+        <div className="space-y-6">
           {detailedResults.map((q, i) => (
             <div
               key={i}
-              className={`bg-gray-900 p-5 sm:p-8 rounded-2xl border-l-4 ${
-                q.isCorrect ? "border-green-500" : "border-red-500"
-              } border-y border-r border-gray-800 shadow-lg`}
+              className={`bg-gray-900/50 p-6 sm:p-8 rounded-[2rem] border transition-all ${
+                q.isCorrect ? "border-gray-800" : "border-red-900/30"
+              }`}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start justify-between gap-6">
                 <div className="flex-1">
-                  <p className="font-bold text-base sm:text-lg mb-4 text-gray-200 leading-tight">
-                    <span className="text-gray-600 mr-2 sm:mr-3 font-mono text-sm sm:text-base">
-                      Q{i + 1}
-                    </span>
+                  <p className="font-bold text-lg text-gray-100 mb-6">
                     {q.question}
                   </p>
-
-                  <div className="space-y-2">
-                    <p className="text-gray-400 text-sm sm:text-base">
-                      Your Answer:{" "}
-                      <span
-                        className={`font-bold block sm:inline ${
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div
+                      className={`p-4 rounded-2xl border ${
+                        q.isCorrect
+                          ? "bg-green-500/5 border-green-500/20"
+                          : "bg-red-500/5 border-red-500/20"
+                      }`}
+                    >
+                      <p className="text-[10px] font-black uppercase text-gray-500 mb-1">
+                        Your Transmission
+                      </p>
+                      <p
+                        className={`font-bold ${
                           q.isCorrect ? "text-green-400" : "text-red-400"
                         }`}
                       >
                         {q.options[q.selectedOption]}
-                      </span>
-                    </p>
-
+                      </p>
+                    </div>
                     {!q.isCorrect && (
-                      <div className="mt-2">
-                        <span className="inline-block text-green-500 font-bold bg-green-900/20 px-3 py-1 rounded border border-green-900/50 text-xs sm:text-sm">
-                          Correct: {q.options[q.correctOption]}
-                        </span>
+                      <div className="p-4 rounded-2xl border bg-gray-800/30 border-gray-700">
+                        <p className="text-[10px] font-black uppercase text-gray-500 mb-1">
+                          Verified Correct
+                        </p>
+                        <p className="font-bold text-white">
+                          {q.options[q.correctOption]}
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
-
-                <div className="shrink-0">
+                <div
+                  className={`shrink-0 p-3 rounded-2xl border ${
+                    q.isCorrect
+                      ? "border-green-500/20 text-green-500"
+                      : "border-red-500/20 text-red-500"
+                  }`}
+                >
                   {q.isCorrect ? (
-                    <CheckCircle className="text-green-500 w-6 h-6 sm:w-8 sm:h-8" />
+                    <CheckCircle size={24} />
                   ) : (
-                    <XCircle className="text-red-500 w-6 h-6 sm:w-8 sm:h-8" />
+                    <XCircle size={24} />
                   )}
                 </div>
               </div>
-
               {q.explanation && (
-                <div className="mt-6 text-xs sm:text-sm text-gray-400 bg-black/50 p-4 sm:p-5 rounded-xl border border-gray-800 leading-relaxed">
-                  <span className="font-bold text-orange-500 block mb-1 uppercase tracking-wide text-[10px] sm:text-xs">
-                    Technical Intelligence
-                  </span>
-                  {q.explanation}
+                <div className="mt-8 p-6 rounded-2xl bg-black/40 border border-gray-800/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Info size={14} className="text-orange-500" />
+                    <span className="font-black text-orange-500 uppercase text-[10px]">
+                      AI Logic Analysis
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-400 italic">
+                    "{q.explanation}"
+                  </p>
                 </div>
               )}
             </div>

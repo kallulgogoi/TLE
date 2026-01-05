@@ -1,7 +1,5 @@
 const User = require("../models/User");
 const Badge = require("../models/Badge");
-
-// Check and award badges based on user achievements
 const checkAndAwardBadges = async (user) => {
   try {
     const badges = await Badge.find({ isActive: true });
@@ -62,8 +60,6 @@ const checkAndAwardBadges = async (user) => {
     return [];
   }
 };
-
-// Get user's badges with details
 const getUserBadges = async (userId) => {
   try {
     const user = await User.findById(userId).populate("badges");
@@ -73,14 +69,12 @@ const getUserBadges = async (userId) => {
     return [];
   }
 };
-
-// Create default badges (UPDATED ICONS TO MATCH FRONTEND MAP)
 const createDefaultBadges = async () => {
   const defaultBadges = [
     {
       name: "First Steps",
       description: "Complete your first quiz",
-      icon: "target", // Maps to Target icon
+      icon: "target",
       criteria: "quizzes_taken",
       threshold: 1,
       rarity: "common",
@@ -89,7 +83,7 @@ const createDefaultBadges = async () => {
     {
       name: "Quick Learner",
       description: "Achieve 90% accuracy in a quiz",
-      icon: "zap", // Maps to Zap icon
+      icon: "zap",
       criteria: "accuracy",
       threshold: 90,
       rarity: "rare",
@@ -98,7 +92,7 @@ const createDefaultBadges = async () => {
     {
       name: "Week Warrior",
       description: "Maintain a 7-day streak",
-      icon: "flame", // Maps to Flame icon
+      icon: "flame",
       criteria: "streak",
       threshold: 7,
       rarity: "common",
@@ -107,7 +101,7 @@ const createDefaultBadges = async () => {
     {
       name: "Master of One",
       description: "Complete one subject",
-      icon: "shield", // Maps to Shield icon
+      icon: "shield",
       criteria: "subject_completion",
       threshold: 1,
       rarity: "rare",
@@ -116,7 +110,7 @@ const createDefaultBadges = async () => {
     {
       name: "Point Collector",
       description: "Earn 10,000 points",
-      icon: "star", // Maps to Star icon
+      icon: "star",
       criteria: "points",
       threshold: 10000,
       rarity: "epic",
@@ -125,7 +119,7 @@ const createDefaultBadges = async () => {
     {
       name: "Consistency King",
       description: "Maintain a 30-day streak",
-      icon: "trophy", // Maps to Trophy icon
+      icon: "trophy",
       criteria: "streak",
       threshold: 30,
       rarity: "legendary",
@@ -139,7 +133,7 @@ const createDefaultBadges = async () => {
       new: true,
     });
   }
-  console.log("✅ Badges synchronized");
+  console.log("Badges synchronized");
 };
 
 module.exports = {

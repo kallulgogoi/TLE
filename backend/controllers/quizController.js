@@ -15,7 +15,7 @@ const { checkAndAwardBadges } = require("../utils/badgeUtils");
 const { predictUserSkill } = require("../utils/mlIntegration"); // ML Service
 const { generateInterview } = require("../utils/geminiAPI"); // Gemini Interview
 
-// --- START QUIZ ---
+// START QUIZ
 const startQuiz = async (req, res) => {
   try {
     const { lessonId } = req.params;
@@ -23,9 +23,6 @@ const startQuiz = async (req, res) => {
       "-questions.options.isCorrect"
     );
     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
-
-    // In Quiz-Only mode, we skip checking 'theoryCompletedLessons'
-
     res.json({
       quizId: quiz._id,
       title: quiz.title,
@@ -76,7 +73,7 @@ const submitQuiz = async (req, res) => {
       .filter(Boolean);
 
     const score = (correctAnswersCount / quiz.questions.length) * 100;
-    const isPassed = score >= (quiz.passingScore || 50);
+    const isPassed = score >= (quiz.passingScore || 40);
     const weakTopics = analyzeWeakAreas(detailedAnswers);
     let nextDifficulty = "medium";
     let performanceMetric = "Stable";
@@ -92,7 +89,6 @@ const submitQuiz = async (req, res) => {
     let pointsEarned = calculatePoints(score, timeTaken, quiz.questions.length);
     const user = await User.findById(req.user.id);
 
-    // Find subject progress within the user document
     const subjectProgress = user.subjects.find(
       (s) => s.subjectId.toString() === lessonDoc.subject.toString()
     );
@@ -111,12 +107,16 @@ const submitQuiz = async (req, res) => {
     let interviewId = null;
     let generatedMsg = "";
 
-    // 1. IMPROVED ACCURACY CALCULATION (Weighted Average)
-    if (subjectProgress && isPassed) {
-      const prevCount = subjectProgress.completedLessons.length;
-      if (!subjectProgress.completedLessons.includes(lessonDoc._id)) {
+    if (subjectProgress) {
+      subjectProgress.totalQuizzes = (subjectProgress.totalQuizzes || 0) + 1;
+      subjectProgress.lastAttempted = new Date();
+
+      if (
+        isPassed &&
+        !subjectProgress.completedLessons.includes(lessonDoc._id)
+      ) {
+        const prevCount = subjectProgress.completedLessons.length;
         subjectProgress.completedLessons.push(lessonDoc._id);
-        // Weighted average formula: ((Old Avg * Old Count) + New Score) / New Count
         subjectProgress.accuracy =
           (subjectProgress.accuracy * prevCount + score) / (prevCount + 1);
       }
@@ -126,29 +126,24 @@ const submitQuiz = async (req, res) => {
     const MAX_LEVEL = 10;
 
     if (isPassed && lessonDoc.level >= MAX_LEVEL) {
-      console.log("Subject Completed! Initiating Final Evaluation...");
       const allAttempts = await QuizAttempt.find({
         user: req.user.id,
         subject: lessonDoc.subject,
       });
-
-      const totalQuizzes = allAttempts.length + 1;
+      const totalQuizzesCount = allAttempts.length + 1;
       const sumScores =
         allAttempts.reduce((acc, curr) => acc + curr.score, 0) + score;
-      const avgAccuracy = sumScores / totalQuizzes / 100;
-
+      const avgAccuracy = sumScores / totalQuizzesCount / 100;
       const sumTime =
         allAttempts.reduce((acc, curr) => acc + curr.timeTaken, 0) + timeTaken;
-      const avgTime = sumTime / totalQuizzes;
-
+      const avgTime = sumTime / totalQuizzesCount;
       const uniquePassed = new Set(
         allAttempts.filter((a) => a.isPassed).map((a) => a.lesson.toString())
       ).size;
-
       const retryRate =
         uniquePassed > 0
-          ? (totalQuizzes - (isPassed ? uniquePassed + 1 : uniquePassed)) /
-            totalQuizzes
+          ? (totalQuizzesCount - (isPassed ? uniquePassed + 1 : uniquePassed)) /
+            totalQuizzesCount
           : 0;
 
       const mlInput = {
@@ -156,12 +151,10 @@ const submitQuiz = async (req, res) => {
         avg_time: avgTime,
         max_difficulty: 3,
         retry_rate: Math.max(0, retryRate),
-        quizzes_attempted: totalQuizzes,
+        quizzes_attempted: totalQuizzesCount,
       };
-
       const prediction = await predictUserSkill(mlInput);
       const predictedSkill = prediction.skill_level || "Intermediate";
-
       const interviewQuestions = await generateInterview(
         subject.name,
         predictedSkill
@@ -176,7 +169,6 @@ const submitQuiz = async (req, res) => {
           skillLevel: 5,
           status: "pending",
         });
-
         await newInterview.save();
         interviewId = newInterview._id;
         generatedMsg = `Course Completed! ${predictedSkill} Interview Generated.`;
@@ -187,7 +179,6 @@ const submitQuiz = async (req, res) => {
         subject: subject._id,
         level: nextLevel,
       });
-
       if (existingNextLesson) {
         nextLessonId = existingNextLesson._id;
         generatedMsg = "Next level unlocked!";
@@ -223,7 +214,6 @@ const submitQuiz = async (req, res) => {
             estimatedTime: 10,
           });
           await newLesson.save();
-
           const newQuiz = new Quiz({
             lesson: newLesson._id,
             title: `Assessment: Level ${nextLevel}`,
@@ -232,26 +222,20 @@ const submitQuiz = async (req, res) => {
             passingScore: 50,
           });
           await newQuiz.save();
-
           newLesson.quiz = newQuiz._id;
           await newLesson.save();
-
           subject.lessons.push(newLesson._id);
           await subject.save();
-
           nextLessonId = newLesson._id;
           generatedMsg = `Level ${nextLevel} Generated`;
-
           if (subjectProgress && subjectProgress.currentLevel < nextLevel) {
             subjectProgress.currentLevel = nextLevel;
           }
         }
       }
     }
-
     await user.save();
 
-    // 2. CREATE QUIZ ATTEMPT
     const quizAttempt = new QuizAttempt({
       user: user._id,
       quiz: quizId,
@@ -269,12 +253,11 @@ const submitQuiz = async (req, res) => {
     });
     await quizAttempt.save();
 
-    // 3. UPDATE USER PROGRESS (Incrementing Total Attempts)
     await UserProgress.findOneAndUpdate(
       { user: req.user.id, subject: lessonDoc.subject },
       {
         $set: { currentLevel: subjectProgress?.currentLevel || 1 },
-        $inc: { totalAttempts: 1 }, // This ensures the dashboard sees the quiz taken
+        $inc: { totalAttempts: 1 },
         $addToSet: {
           completedLessons: isPassed
             ? {
@@ -287,8 +270,8 @@ const submitQuiz = async (req, res) => {
       },
       { upsert: true }
     );
-
     checkAndAwardBadges(user).catch((err) => console.error(err));
+
     updateSkillMetrics(req.user.id, lessonDoc.subject, quizAttempt).catch(
       (err) => console.error(err)
     );

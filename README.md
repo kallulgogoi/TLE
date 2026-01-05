@@ -107,38 +107,38 @@ npm install
 # ⚙️ Environment Variables
 ## 🔐 Backend (/backend/.env)
 ### Server
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL=http://localhost:5173
+#### PORT=5000
+#### NODE_ENV=development
+#### FRONTEND_URL=http://localhost:5173
 
 ### Database
-MONGODB_URI=
+#### MONGODB_URI=
 
 ### Authentication
-JWT_SECRET=
-JWT_EXPIRE=7d
+#### JWT_SECRET=
+#### JWT_EXPIRE=7d
 
 ### Google OAuth
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GOOGLE_CALLBACK_URL=
+#### GOOGLE_CLIENT_ID=
+#### GOOGLE_CLIENT_SECRET=
+#### GOOGLE_CALLBACK_URL=
 
 ### Cloudinary
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+#### CLOUDINARY_CLOUD_NAME=
+#### CLOUDINARY_API_KEY=
+#### CLOUDINARY_API_SECRET=
 
 ### Gemini AI
-GEMINI_API_KEY=
+#### GEMINI_API_KEY=
 
 ### ML Service
-ML_API_URL=http://localhost:8000
+#### ML_API_URL=http://localhost:8000
 
 ## 🌐 Frontend (/frontend/.env)
-VITE_API_URL=http://localhost:5000/api
+#### VITE_API_URL=http://localhost:5000/api
 
 # 🚢 Deployment Guide
-## 🔹 Backend & ML Service (Render)
+## 🔹Backend & ML Service (Render)
 ### ML Service
 
 Type: Web Service

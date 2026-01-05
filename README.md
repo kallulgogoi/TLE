@@ -4,7 +4,7 @@ A gamified, full-stack adaptive learning platform that dynamically adjusts quiz 
 
 Designed to help students learn smarter, not harder — progressing from fundamentals to interview-level questions based on real performance.
 
-🌟 Key Features
+# 🌟 Key Features
 🧠 Adaptive Learning Engine
 
 Uses a Scikit-Learn Decision Tree model to evaluate student performance
@@ -39,7 +39,7 @@ FastAPI ML Service → High-performance ML predictions
 
 Clean separation of concerns for scalability and maintainability
 
-🛠️ Tech Stack
+# 🛠️ Tech Stack
 Frontend
 
 ⚛️ React + Vite
@@ -76,8 +76,7 @@ Database & Cloud
 
 ☁️ Cloudinary (Media Uploads)
 
-🚀 Getting Started
-📋 Prerequisites
+# 📋 Prerequisites
 
 Node.js v16+
 
@@ -87,7 +86,7 @@ MongoDB Atlas Account
 
 Google AI Studio API Key (Gemini)
 
-📦 Installation
+# 📦 Installation
 1️⃣ Clone the Repository
 git clone https://github.com/kallulgogoi/TLE.git
 cd TLE
@@ -105,42 +104,42 @@ pip install -r requirements.txt
 cd ../frontend
 npm install
 
-⚙️ Environment Variables
-🔐 Backend (/backend/.env)
-# Server
+# ⚙️ Environment Variables
+## 🔐 Backend (/backend/.env)
+### Server
 PORT=5000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 
-# Database
+### Database
 MONGODB_URI=
 
-# Authentication
+### Authentication
 JWT_SECRET=
 JWT_EXPIRE=7d
 
-# Google OAuth
+### Google OAuth
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=
 
-# Cloudinary
+### Cloudinary
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-# Gemini AI
+### Gemini AI
 GEMINI_API_KEY=
 
-# ML Service
+### ML Service
 ML_API_URL=http://localhost:8000
 
-🌐 Frontend (/frontend/.env)
+## 🌐 Frontend (/frontend/.env)
 VITE_API_URL=http://localhost:5000/api
 
-🚢 Deployment Guide
-🔹 Backend & ML Service (Render)
-ML Service
+# 🚢 Deployment Guide
+## 🔹 Backend & ML Service (Render)
+### ML Service
 
 Type: Web Service
 
@@ -153,7 +152,7 @@ Start Command:
 
 uvicorn main:app --host 0.0.0.0 --port 8000
 
-Node Backend
+### Node Backend
 
 Type: Web Service
 
@@ -166,24 +165,24 @@ Start Command:
 
 node index.js
 
-⏰ Cold Start Prevention
+### ⏰ Cold Start Prevention
 
 Use an external pinger (e.g., cron-job.org) to hit:
 
 /health or /ping every 10 minutes.
 
-🔹 Frontend (Vercel)
+## 🔹 Frontend (Vercel)
 
 Connect your GitHub repository
 
-Set environment variable:
+### Set environment variable:
 
 VITE_API_URL = https://your-render-backend-url
 
 
 Deploy 🎉
 
-🎯 Future Enhancements
+# 🎯 Future Enhancements
 
 Personalized learning paths
 
@@ -195,9 +194,9 @@ Skill analytics dashboard
 
 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+## Contributions, issues, and feature requests are welcome!
 Feel free to fork and submit a PR.
 
-⭐ Show Your Support
+## ⭐ Show Your Support
 
 If you like this project, give it a star ⭐ — it really helps!

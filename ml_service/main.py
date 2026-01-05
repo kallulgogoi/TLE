@@ -72,3 +72,6 @@ def predict_skill(data: SkillInput):
     }
     print(f"DEBUG: Final API response dict (v2): {final_response}") # Added version identifier
     return final_response
+@app.get("/ping")
+def ping():
+    return {"status": "alive", "timestamp": pd.Timestamp.now()}

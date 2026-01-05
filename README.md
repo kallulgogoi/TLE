@@ -1,4 +1,4 @@
-🚀 AI Adaptive Quiz System
+#🚀 Padho.AI (AI Adaptive Quiz learning System ) 
 
 A gamified, full-stack adaptive learning platform that dynamically adjusts quiz difficulty based on student performance using Machine Learning, and provides AI-generated technical insights and explanations powered by Google Gemini.
 

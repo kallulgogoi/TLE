@@ -13,7 +13,6 @@ const AuthCallback = () => {
 
       if (token) {
         try {
-          // Wait for user data to be fetched before redirecting
           await login(token);
           navigate("/dashboard");
         } catch (error) {
@@ -29,9 +28,22 @@ const AuthCallback = () => {
   }, [searchParams, login, navigate]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-      <p className="text-gray-600 font-medium">Finalizing your login...</p>
+    
+    <div className="flex flex-col items-center justify-center min-h-[100dvh] w-full bg-gray-50 px-4 text-center">
+      <div className="relative flex items-center justify-center">
+        
+        <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-indigo-600"></div>
+
+        <span className="sr-only">Processing authentication...</span>
+      </div>
+
+      <p className="mt-6 text-gray-600 font-medium text-sm sm:text-base tracking-tight sm:tracking-normal">
+        Finalizing your login...
+      </p>
+
+      <p className="mt-2 text-gray-400 text-xs">
+        This will only take a moment.
+      </p>
     </div>
   );
 };

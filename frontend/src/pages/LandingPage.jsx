@@ -60,7 +60,7 @@ const LandingPage = () => {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900/50 border border-gray-800 text-sm text-gray-400 mb-8 hover:border-orange-500/50 transition-colors cursor-default backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></span>
               <span className="tracking-widest font-mono text-xs">
-                PADHO.AI v2.0 ONLINE
+                PADHO.AI v1.0 ONLINE
               </span>
             </div>
           </div>
@@ -229,7 +229,7 @@ const LandingPage = () => {
           <div className="text-2xl font-black italic tracking-tighter text-white">
             Padho<span className="text-orange-500">.AI</span>
           </div>
-          <p className="text-gray-600">© 2024 Padho.AI. All systems nominal.</p>
+          <p className="text-gray-600">© 2026 Padho.AI. All systems nominal.</p>
           <div className="flex gap-6">
             <a
               href="#"

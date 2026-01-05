@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import {
@@ -15,6 +15,7 @@ import {
   User,
   Star,
   Flame,
+  Upload,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -39,6 +40,8 @@ const ProfilePage = () => {
   const [badgeData, setBadgeData] = useState([]);
   const [badgeLoading, setBadgeLoading] = useState(true);
 
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     if (user) {
       setName(user.name);
@@ -58,9 +61,18 @@ const ProfilePage = () => {
     }
   };
 
-  const generateRandomAvatar = () => {
-    const randomSeed = Math.random().toString(36).substring(7);
-    setAvatar(`https://api.dicebear.com/7.x/avataaars/svg?seed=${randomSeed}`);
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) {
+        return toast.error("Image too large. Please select a file under 1MB.");
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -70,6 +82,7 @@ const ProfilePage = () => {
       await updateUserProfile({ name, avatar });
       setIsEditing(false);
       toast.success("Identity updated successfully.");
+      fetchBadges();
     } catch (error) {
       console.error("Update failed", error);
       toast.error("Failed to update profile.");
@@ -83,7 +96,6 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-black text-white p-4 sm:p-6 md:p-8 pb-24 font-sans">
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        {/* --- HEADER --- */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-gray-800 pb-6">
           <div className="w-full md:w-auto">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-tighter text-white mb-2 leading-tight">
@@ -104,7 +116,6 @@ const ProfilePage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* --- LEFT COLUMN: IDENTITY CARD --- */}
           <div className="lg:col-span-1">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/10 rounded-full blur-[50px]"></div>
@@ -120,18 +131,24 @@ const ProfilePage = () => {
                     />
                   </div>
                   {isEditing && (
-                    <button
-                      onClick={generateRandomAvatar}
-                      type="button"
-                      className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 bg-orange-600 p-2.5 sm:p-3 rounded-full text-white shadow-lg hover:bg-orange-500 hover:scale-110 transition-all active:scale-90"
-                      title="Generate New Look"
-                    >
-                      <Camera size={18} className="sm:w-5 sm:h-5" />
-                    </button>
+                    <>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                      <button
+                        onClick={() => fileInputRef.current.click()}
+                        type="button"
+                        className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 bg-orange-600 p-2.5 sm:p-3 rounded-full text-white shadow-lg hover:bg-orange-500 hover:scale-110 transition-all active:scale-90"
+                      >
+                        <Upload size={18} className="sm:w-5 sm:h-5" />
+                      </button>
+                    </>
                   )}
                 </div>
-
-                {/* Form / Profile Info */}
                 {isEditing ? (
                   <form onSubmit={handleSubmit} className="w-full space-y-4">
                     <div className="text-left">
@@ -145,21 +162,13 @@ const ProfilePage = () => {
                         className="w-full bg-gray-800 border border-gray-700 text-white px-4 py-2.5 sm:py-3 rounded-xl focus:border-orange-500 focus:outline-none font-bold"
                       />
                     </div>
-                    <div className="text-left">
-                      <label className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-widest">
-                        Avatar URL
-                      </label>
-                      <input
-                        type="text"
-                        value={avatar}
-                        onChange={(e) => setAvatar(e.target.value)}
-                        className="w-full bg-gray-800 border border-gray-700 text-gray-400 px-4 py-2.5 sm:py-3 rounded-xl focus:border-orange-500 focus:outline-none text-xs font-mono"
-                      />
-                    </div>
                     <div className="flex flex-col sm:flex-row gap-2 pt-2">
                       <button
                         type="button"
-                        onClick={() => setIsEditing(false)}
+                        onClick={() => {
+                          setIsEditing(false);
+                          setAvatar(user.avatar);
+                        }}
                         className="order-2 sm:order-1 flex-1 bg-gray-800 text-gray-300 py-3 rounded-xl font-bold hover:bg-gray-700 transition-colors"
                       >
                         Cancel
@@ -210,8 +219,6 @@ const ProfilePage = () => {
               </div>
             </div>
           </div>
-
-          {/* --- RIGHT COLUMN: DYNAMIC BADGES --- */}
           <div className="lg:col-span-2 space-y-6 sm:space-y-8">
             <div className="bg-gray-900 border border-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8">
               <h3 className="text-lg sm:text-xl font-bold text-white mb-6 flex items-center gap-2">
@@ -256,7 +263,6 @@ const ProfilePage = () => {
                             : "bg-black/40 border-gray-800/50 opacity-60"
                         }`}
                       >
-                        {/* Icon Container */}
                         <div
                           className={`w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-1 ${
                             earned
@@ -291,7 +297,6 @@ const ProfilePage = () => {
                           </div>
                         )}
 
-                        {/* Mobile Requirement Overlay (Click/Touch) & Tablet Hover */}
                         <div className="absolute inset-0 bg-black/90 backdrop-blur-[2px] flex flex-col items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity p-4 text-center">
                           {!earned ? (
                             <div className="w-full">

@@ -12,7 +12,7 @@ const userRoutes = require("./routes/userRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const lessonRoutes = require("./routes/lessonRoutes");
 const quizRoutes = require("./routes/quizRoutes");
-const interviewRoutes = require("./routes/interviewRoutes"); // UNCOMMENTED
+const interviewRoutes = require("./routes/interviewRoutes");
 const badgeRoutes = require("./routes/badgeRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const { createDefaultBadges } = require("./utils/badgeUtils");
@@ -38,7 +38,7 @@ app.use(
           "'self'",
           "https://*.googleapis.com",
           "https://generativelanguage.googleapis.com",
-          "http://localhost:8000", // Allow connection to Python ML Service
+          process.env.ML_API_URL || "http://localhost:8000", // Allow connection to Python ML Service
         ],
       },
     },
@@ -69,7 +69,6 @@ mongoose
   })
   .then(async () => {
     console.log("MongoDB connected");
-    // Initialize badges if needed
     if (createDefaultBadges) await createDefaultBadges();
   })
   .catch((err) => {
@@ -118,6 +117,10 @@ app.use("*", (req, res) => {
 
 // Error Handler
 app.use(errorHandler);
+//cron job route
+app.get("/ping", (req, res) => {
+  res.status(200).send("Pong");
+});
 
 const PORT = process.env.PORT || 5000;
 

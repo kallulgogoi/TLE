@@ -9,24 +9,18 @@ const QuizAttempt = require("./models/QuizAttempt");
 const createIndexes = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log("✅ Connected to DB. Creating indexes...");
-
-    // 1. User Lookups
+    console.log("Connected to DB. Creating indexes...");
     await User.collection.createIndex({ email: 1 });
     await User.collection.createIndex({ googleId: 1 });
     // Index arrays for faster search
     await User.collection.createIndex({ "subjects.subjectId": 1 });
-
-    // 2. Lesson/Quiz Lookups
     await Lesson.collection.createIndex({ subject: 1, level: 1 });
     await Quiz.collection.createIndex({ lesson: 1 });
-
-    // 3. Stats Lookups
     await QuizAttempt.collection.createIndex({ user: 1 });
     await QuizAttempt.collection.createIndex({ user: 1, subject: 1 });
     await QuizAttempt.collection.createIndex({ completedAt: -1 });
 
-    console.log("✅ Indexes Created Successfully! App should be fast now.");
+    console.log("Indexes Created Successfully! App should be fast .");
     process.exit();
   } catch (err) {
     console.error("Error creating indexes:", err);

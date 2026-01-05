@@ -46,7 +46,7 @@ const quizAttemptSchema = new mongoose.Schema({
     required: true,
   },
   timeTaken: {
-    type: Number, // in seconds
+    type: Number,
     required: true,
   },
   pointsEarned: {
@@ -66,11 +66,9 @@ const quizAttemptSchema = new mongoose.Schema({
     default: false,
   },
 });
-
-// Calculate accuracy before saving
 quizAttemptSchema.pre("save", function (next) {
   this.accuracy = (this.correctAnswers / this.totalQuestions) * 100;
-  this.isPassed = this.accuracy >= 70;
+  this.isPassed = this.accuracy >= 40;
   next();
 });
 

@@ -16,7 +16,6 @@ const lessonSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  // -----------------------------------------------------------
   title: {
     type: String,
     required: true,
@@ -40,7 +39,7 @@ const lessonSchema = new mongoose.Schema({
     },
   ],
   estimatedTime: {
-    type: Number, // in minutes
+    type: Number,
     default: 30,
   },
   quiz: {

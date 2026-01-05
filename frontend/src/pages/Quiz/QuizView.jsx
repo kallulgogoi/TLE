@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 import { Timer, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const QuizView = () => {
   const { lessonId } = useParams();
   const navigate = useNavigate();
+  const { checkUser } = useAuth();
   const [quizData, setQuizData] = useState(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
@@ -54,6 +56,8 @@ const QuizView = () => {
         answers: formattedAnswers,
         timeTaken: quizData.timeLimit - timeLeft,
       });
+      await checkUser();
+
       navigate(`/quiz/results/${data.result.quizAttemptId}`);
     } catch (error) {
       console.error("Error submitting quiz", error);
@@ -74,7 +78,7 @@ const QuizView = () => {
     : null;
   if (!currentQuestion)
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-6 text-center text-red-500 font-mono">
+      <div className="min-h-dvh flex items-center justify-center p-6 text-center text-red-500 font-mono">
         Error: Missing Data
       </div>
     );
@@ -94,7 +98,6 @@ const QuizView = () => {
 
   return (
     <div className="max-w-4xl mx-auto mt-4 sm:mt-8 px-4 pb-10">
-      {/* Top Bar: Becomes vertical on mobile to save space */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8 bg-gray-900 p-4 sm:p-6 rounded-2xl border border-gray-800 shadow-xl">
         <div className="w-full sm:w-auto">
           <h2 className="font-bold text-white text-base sm:text-lg truncate">
@@ -107,7 +110,7 @@ const QuizView = () => {
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
-            <span className="text-[10px] sm:text-xs text-gray-400 font-mono flex-shrink-0">
+            <span className="text-[10px] sm:text-xs text-gray-400 font-mono shrink-0">
               Q{currentQIndex + 1} / {quizData.totalQuestions}
             </span>
           </div>
@@ -141,7 +144,6 @@ const QuizView = () => {
         )}
 
         <div>
-          {/* Responsive Question Font Size */}
           <div className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-100 mb-6 sm:mb-10 leading-relaxed font-sans">
             <ReactMarkdown components={questionComponents}>
               {currentQuestion.question}
@@ -187,8 +189,6 @@ const QuizView = () => {
             })}
           </div>
         </div>
-
-        {/* Footer Navigation: Stack buttons on mobile */}
         <div className="flex flex-col-reverse sm:flex-row justify-between items-center mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-800 gap-4">
           <button
             onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}

@@ -1,7 +1,7 @@
 const Subject = require("../models/Subject");
 const Lesson = require("../models/Lesson");
 const User = require("../models/User");
-
+const QuizAttempt = require("../models/QuizAttempt");
 // Get All Subjects (List View)
 const getSubjects = async (req, res) => {
   try {
@@ -23,15 +23,20 @@ const getSubjectById = async (req, res) => {
       return res.status(404).json({ message: "User profile not found" });
     }
 
-    // Find the enrollment entry for this subject
+    // find the enrollment entry
     const userSubject = user.subjects.find(
       (s) => s.subjectId.toString() === subjectId
     );
     const userRating = userSubject ? parseInt(userSubject.skillLevel || 1) : 1;
+    const actualAttempts = await QuizAttempt.countDocuments({
+      user: userId,
+      subject: subjectId,
+    });
 
     console.log(
-      `[DEBUG] Fetching Subject ${subjectId} for User Rating: ${userRating}`
+      `[DEBUG] Subject: ${subjectId} | User: ${userId} | Attempts Found: ${actualAttempts}`
     );
+
     const subject = await Subject.findById(subjectId)
       .populate({
         path: "lessons",
@@ -43,6 +48,7 @@ const getSubjectById = async (req, res) => {
     if (!subject) {
       return res.status(404).json({ message: "Subject not found" });
     }
+
     const filteredLessons = subject.lessons.filter((lesson) => {
       if (lesson.level > 1) return true;
       if (lesson.level === 1) {
@@ -50,10 +56,17 @@ const getSubjectById = async (req, res) => {
       }
       return false;
     });
+
+    // 3. Inject the real count into the response object
     res.json({
       ...subject,
       lessons: filteredLessons,
-      userProgress: userSubject || null,
+      userProgress: userSubject
+        ? {
+            ...userSubject,
+            totalQuizzes: actualAttempts, // Override with the real DB count
+          }
+        : null,
     });
   } catch (error) {
     console.error("Subject Fetch Error:", error);

@@ -29,12 +29,14 @@ const SubjectList = () => {
 
   const getEnrollmentStatus = (subjectId) => {
     if (!user || !user.subjects) return null;
-    const enrollment = user.subjects.find(
-      (s) => s.subjectId._id === subjectId || s.subjectId === subjectId
-    );
+    const enrollment = user.subjects.find((s) => {
+      const enrollmentId = s.subjectId?._id || s.subjectId;
+      return enrollmentId === subjectId;
+    });
+
     if (!enrollment) return null;
-    if (enrollment.isCompleted) return "COMPLETED";
-    return "IN_PROGRESS";
+
+    return enrollment.isCompleted ? "COMPLETED" : "IN_PROGRESS";
   };
 
   const handleStartSubject = async (subjectId) => {
@@ -49,16 +51,13 @@ const SubjectList = () => {
 
   if (loading)
     return (
-      /* Using 100dvh to center perfectly on mobile browsers */
-      <div className="flex justify-center items-center min-h-[100dvh]">
+      <div className="flex justify-center items-center min-h-dvh">
         <Loader2 className="animate-spin text-orange-500 w-10 h-10 md:w-12 md:h-12" />
       </div>
     );
 
   return (
-    /* Responsive container padding */
     <div className="container mx-auto px-4 sm:px-6 py-6 md:py-10 pb-24">
-      {/* Header: Scaled text for mobile */}
       <div className="mb-8 md:mb-12">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 md:mb-4 italic tracking-tighter uppercase">
           Active <span className="text-orange-500">Domains</span>
@@ -68,8 +67,6 @@ const SubjectList = () => {
           unlock advanced protocols.
         </p>
       </div>
-
-      {/* Grid: Adaptive gap and column count */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
         {subjects.map((subject) => {
           const status = getEnrollmentStatus(subject._id);
@@ -80,12 +77,10 @@ const SubjectList = () => {
               key={subject._id}
               className="group relative bg-gray-900 border border-gray-800 rounded-2xl sm:rounded-3xl p-6 sm:p-8 hover:border-orange-500/50 transition-all duration-300 md:hover:-translate-y-2 shadow-2xl overflow-hidden flex flex-col active:scale-[0.98] md:active:scale-100"
             >
-              {/* Subtle background glow */}
               <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-orange-600/5 rounded-full blur-[40px] md:blur-[60px] group-hover:bg-orange-600/10 transition-colors pointer-events-none"></div>
 
               <div className="relative z-10 flex-1">
                 <div className="flex justify-between items-start mb-5 md:mb-6">
-                  {/* Icon Box: Scaled for mobile */}
                   <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center p-3 shadow-inner group-hover:scale-105 md:group-hover:scale-110 transition-transform duration-300">
                     <img
                       src={
@@ -97,7 +92,6 @@ const SubjectList = () => {
                     />
                   </div>
 
-                  {/* Status Badges: Compact on mobile */}
                   <div className="flex flex-col items-end gap-1">
                     {status === "COMPLETED" && (
                       <span className="px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-[10px] md:text-xs font-bold flex items-center gap-1.5 tracking-wide">
@@ -119,7 +113,6 @@ const SubjectList = () => {
                   {subject.description}
                 </p>
 
-                {/* Tech Specs: Simplified for small screens */}
                 <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs font-mono text-gray-500 mb-6 md:mb-8">
                   <span className="bg-gray-800/50 border border-gray-700/50 px-2 py-0.5 md:py-1 rounded whitespace-nowrap">
                     {subject.totalLevels || 15} LEVELS

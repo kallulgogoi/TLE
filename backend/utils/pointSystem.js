@@ -15,10 +15,7 @@ const calculatePoints = (accuracy, timeTaken, totalQuestions) => {
     timeBonus = 25;
   }
 
-  // Streak bonus (implement if tracking consecutive correct answers)
-  const streakBonus = 0; // You can implement streak tracking
-
-  // Difficulty multiplier (implement if tracking question difficulty)
+  const streakBonus = 0;
   const difficultyMultiplier = 1.0;
 
   const totalPoints = (points + timeBonus + streakBonus) * difficultyMultiplier;
@@ -39,11 +36,6 @@ const calculateLevel = (totalPoints) => {
     50000, // Level 8
     75000, // Level 9
     100000, // Level 10
-    150000, // Level 11
-    200000, // Level 12
-    300000, // Level 13
-    500000, // Level 14
-    750000, // Level 15
   ];
 
   for (let i = levels.length - 1; i >= 0; i--) {
